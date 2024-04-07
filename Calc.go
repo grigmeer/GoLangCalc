@@ -63,38 +63,6 @@ func arabicToRoman(num int) string {
 
 	var result strings.Builder
 
-	for num >= 1000 {
-		result.WriteString("M")
-		num -= 1000
-	}
-	for num >= 900 {
-		result.WriteString("CM")
-		num -= 900
-	}
-	for num >= 500 {
-		result.WriteString("D")
-		num -= 500
-	}
-	for num >= 400 {
-		result.WriteString("CD")
-		num -= 400
-	}
-	for num >= 100 {
-		result.WriteString("C")
-		num -= 100
-	}
-	for num >= 90 {
-		result.WriteString("XC")
-		num -= 90
-	}
-	for num >= 50 {
-		result.WriteString("L")
-		num -= 50
-	}
-	for num >= 40 {
-		result.WriteString("XL")
-		num -= 40
-	}
 	for num >= 10 {
 		result.WriteString("X")
 		num -= 10
