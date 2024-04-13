@@ -22,30 +22,18 @@ var romanToArabic = map[string]int{
 	"X":    10,
 }
 
-// Функция для определения типа числа
-func detectNumberType(input string) string {
-	_, err := strconv.Atoi(input)
-	if err == nil {
-		return "arabic"
-	}
-
-	_, ok := romanToArabic[input]
-	if ok {
-		return "roman"
-	}
-
-	return "invalid"
-}
-
 // Функция для парсинга арабских и римских чисел
 func parseNumber(input string) (int, error) {
-	// Проверяем, является ли введенное значение арабским числом
+	// Пытаемся спарсить как арабское число
 	num, err := strconv.Atoi(input)
 	if err == nil {
+		if num < 1 || num > 10 {
+			return 0, fmt.Errorf("число должно быть от 1 до 10")
+		}
 		return num, nil
 	}
 
-	// Проверяем, является ли введенное значение римским числом
+	// Пытаемся спарсить как римское число
 	roman := strings.ToUpper(input)
 	value, ok := romanToArabic[roman]
 	if !ok {
@@ -53,38 +41,6 @@ func parseNumber(input string) (int, error) {
 	}
 
 	return value, nil
-}
-
-// Функция для преобразования арабских чисел в римские
-func arabicToRoman(num int) string {
-	if num <= 0 || num > 1000 {
-		return "Недопустимое значение"
-	}
-
-	var result strings.Builder
-
-	for num >= 10 {
-		result.WriteString("X")
-		num -= 10
-	}
-	for num >= 9 {
-		result.WriteString("IX")
-		num -= 9
-	}
-	for num >= 5 {
-		result.WriteString("V")
-		num -= 5
-	}
-	for num >= 4 {
-		result.WriteString("IV")
-		num -= 4
-	}
-	for num >= 1 {
-		result.WriteString("I")
-		num -= 1
-	}
-
-	return result.String()
 }
 
 // Функция для парсинга операторов
@@ -107,32 +63,16 @@ func parseOperator(input string) (string, error) {
 func calculate(a, b int, operator string) (int, error) {
 	switch operator {
 	case "+":
-		result := a + b
-		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
-		}
-		return result, nil
+		return a + b, nil
 	case "-":
-		result := a - b
-		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
-		}
-		return result, nil
+		return a - b, nil
 	case "*":
-		result := a * b
-		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
-		}
-		return result, nil
+		return a * b, nil
 	case "/":
 		if b == 0 {
 			return 0, fmt.Errorf("деление на ноль")
 		}
-		result := a / b
-		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
-		}
-		return result, nil
+		return a / b, nil
 	default:
 		return 0, fmt.Errorf("некорректная операция: %s", operator)
 	}
@@ -172,18 +112,6 @@ func main() {
 		return
 	}
 
-	// Проверяем, чтобы оба числа были либо арабскими, либо римскими
-	if (a > 10 && b <= 10) || (a <= 10 && b > 10) {
-		fmt.Println("Калькулятор умеет работать только с арабскими или римскими числами одновременно.")
-		return
-	}
-
-	// Проверяем, чтобы оба числа были одного типа
-	if detectNumberType(parts[0]) != detectNumberType(parts[2]) {
-		fmt.Println("Нельзя складывать арабские и римские числа одновременно.")
-		return
-	}
-
 	// Выполняем операцию
 	result, err := calculate(a, b, operator)
 	if err != nil {
@@ -192,9 +120,5 @@ func main() {
 	}
 
 	// Выводим результат
-	if detectNumberType(parts[0]) == "roman" && detectNumberType(parts[2]) == "roman" {
-		fmt.Printf("%s %s %s = %s\n", parts[0], operator, parts[2], arabicToRoman(result))
-	} else {
-		fmt.Printf("%d %s %d = %d\n", a, operator, b, result)
-	}
+	fmt.Printf("%d %s %d = %d\n", a, operator, b, result)
 }
