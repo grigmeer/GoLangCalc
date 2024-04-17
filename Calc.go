@@ -34,25 +34,25 @@ func detectNumberType(input string) string {
 		return "roman"
 	}
 
-	return "invalid"
+	panic(fmt.Sprintf("некорректный тип числа: %s", input))
 }
 
 // Функция для парсинга арабских и римских чисел
-func parseNumber(input string) (int, error) {
+func parseNumber(input string) int {
 	// Проверяем, является ли введенное значение арабским числом
 	num, err := strconv.Atoi(input)
 	if err == nil {
-		return num, nil
+		return num
 	}
 
 	// Проверяем, является ли введенное значение римским числом
 	roman := strings.ToUpper(input)
 	value, ok := romanToArabic[roman]
 	if !ok {
-		return 0, fmt.Errorf("некорректное арабское или римское число: %s", input)
+		panic(fmt.Sprintf("некорректное арабское или римское число: %s", input))
 	}
 
-	return value, nil
+	return value
 }
 
 // Функция для преобразования арабских чисел в римские
@@ -120,57 +120,63 @@ func arabicToRoman(num int) string {
 }
 
 // Функция для парсинга операторов
-func parseOperator(input string) (string, error) {
+func parseOperator(input string) string {
 	switch input {
 	case "+", "plus":
-		return "+", nil
+		return "+"
 	case "-", "minus":
-		return "-", nil
+		return "-"
 	case "*", "multiply":
-		return "*", nil
+		return "*"
 	case "/", "divide":
-		return "/", nil
+		return "/"
 	default:
-		return "", fmt.Errorf("некорректный оператор: %s", input)
+		panic(fmt.Sprintf("некорректный оператор: %s", input))
 	}
 }
 
 // Функция для выполнения арифметических операций
-func calculate(a, b int, operator string) (int, error) {
+func calculate(a, b int, operator string) int {
 	switch operator {
 	case "+":
 		result := a + b
 		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
+			panic("результат отрицательный")
 		}
-		return result, nil
+		return result
 	case "-":
 		result := a - b
 		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
+			panic("результат отрицательный")
 		}
-		return result, nil
+		return result
 	case "*":
 		result := a * b
 		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
+			panic("результат отрицательный")
 		}
-		return result, nil
+		return result
 	case "/":
 		if b == 0 {
-			return 0, fmt.Errorf("деление на ноль")
+			panic("деление на ноль")
 		}
 		result := a / b
 		if result < 0 {
-			return 0, fmt.Errorf("результат отрицательный")
+			panic("результат отрицательный")
 		}
-		return result, nil
+		return result
 	default:
-		return 0, fmt.Errorf("некорректная операция: %s", operator)
+		panic(fmt.Sprintf("некорректная операция: %s", operator))
 	}
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Ошибка:", r)
+		}
+	}()
+
 	fmt.Println("Добро пожаловать в калькулятор!")
 
 	// Считываем строку с консоли
@@ -182,46 +188,25 @@ func main() {
 	// Парсим введенное выражение
 	parts := strings.Split(input, " ")
 	if len(parts) != 3 {
-		fmt.Println("Некорректное выражение. Используйте формат: число оператор число")
-		return
+		panic("некорректное выражение. Используйте формат: число оператор число")
 	}
 
-	a, err := parseNumber(parts[0])
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	operator, err := parseOperator(parts[1])
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	b, err := parseNumber(parts[2])
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	a := parseNumber(parts[0])
+	operator := parseOperator(parts[1])
+	b := parseNumber(parts[2])
 
 	// Проверяем, чтобы оба числа были либо арабскими, либо римскими
 	if (a > 10 && b <= 10) || (a <= 10 && b > 10) {
-		fmt.Println("Калькулятор умеет работать только с числами меньше 10 (X).")
-		return
+		panic("калькулятор умеет работать только с числами меньше 10 (X)")
 	}
 
 	// Проверяем, чтобы оба числа были одного типа
 	if detectNumberType(parts[0]) != detectNumberType(parts[2]) {
-		fmt.Println("Нельзя складывать арабские и римские числа одновременно.")
-		return
+		panic("нельзя складывать арабские и римские числа одновременно")
 	}
 
 	// Выполняем операцию
-	result, err := calculate(a, b, operator)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	result := calculate(a, b, operator)
 
 	// Выводим результат
 	if detectNumberType(parts[0]) == "roman" && detectNumberType(parts[2]) == "roman" {
